@@ -67,7 +67,7 @@ int main(int argc, char* argv[])
     // ===================== //
     // === Load the Moon === //
     // ===================== //
-    auto regolith = scene.newLambertianMaterial("regolith");
+    auto regolith = scene.newMcEwenMaterial("regolith");
 
     auto moon = scene.newGroup();
     scene[moon].addQuipusAsInstances(qpuPath, regolith, true);
