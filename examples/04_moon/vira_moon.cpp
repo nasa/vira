@@ -10,9 +10,23 @@ int main(int argc, char* argv[])
     // ========================== //
     // === Validate the Input === //
     // ========================== //
-    (void)argc;
-    (void)argv;
-
+    // Usage: vira_moon <path-to-qpu-dir-or-glob>
+    // If a directory is supplied it will be turned into "<dir>/*".
+    std::string qpuPath = "../../../data/qpu/*"; // default
+    if (argc > 1 && argv[1] != nullptr) {
+        try {
+            fs::path p(argv[1]);
+            if (fs::exists(p) && fs::is_directory(p)) {
+                qpuPath = (p / "*").string();
+            } else {
+                // If it's not an existing directory, assume the user passed a glob or path
+                qpuPath = argv[1];
+            }
+        } catch (const fs::filesystem_error &e) {
+            std::cerr << "Warning: filesystem error while processing argument: " << e.what() << '\n'
+                      << "Falling back to default: " << qpuPath << '\n';
+        }
+    }
 
     vira::enablePrintStatus();
 
@@ -56,7 +70,7 @@ int main(int argc, char* argv[])
     auto regolith = scene.newLambertianMaterial("regolith");
 
     auto moon = scene.newGroup();
-    scene[moon].addQuipusAsInstances("../../../data/qpu/*", regolith, true);
+    scene[moon].addQuipusAsInstances(qpuPath, regolith, true);
 
 
     // ============================ //
