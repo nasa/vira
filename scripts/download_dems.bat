@@ -42,7 +42,7 @@ echo.
 echo Downloading South Pole Maps
 curl -L https://pgda.gsfc.nasa.gov/data/LOLA_20mpp/LDEM_60S_60MPP_ADJ.TIF -o "%OUTPUT_DIR%\LDEM_60S_60M.TIF"
 curl -L https://pgda.gsfc.nasa.gov/data/LOLA_20mpp/LDEM_80S_20MPP_ADJ.TIF -o "%OUTPUT_DIR%\LDEM_80S_20M.TIF"
-curl -L https://pgda.gsfc.nasa.gov/data/LOLA_5mpp/87S/ldem_87s_5mpp.tif -o "%OUTPUT_DIR%\LDEM_87S_5M.tif"
+curl -L https://pgda.gsfc.nasa.gov/data/LOLA_5mpp/87S/ldem_87s_5mpp.tif -o "%OUTPUT_DIR%\LDEM_87S_5M.TIF"
 
 
 echo.
