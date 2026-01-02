@@ -113,7 +113,7 @@ install(DIRECTORY "${CMAKE_SOURCE_DIR}/include/"
 
 # Export the targets
 install(EXPORT ViraTargets
-    FILE ViraTargets.cmake
+    FILE viraTargets.cmake
     NAMESPACE vira::
     DESTINATION ${VIRA_INSTALL_CMAKEDIR}
 )

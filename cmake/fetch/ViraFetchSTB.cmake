@@ -54,7 +54,7 @@ if(used_fetchcontent)
     message(STATUS "STB Used FetchContent: ${stb_SOURCE_DIR}")
 
     install(DIRECTORY "${stb_SOURCE_DIR}/"
-        DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/stb
+        DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
         FILES_MATCHING PATTERN "*.h"
     )
 else()

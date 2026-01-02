@@ -21,6 +21,12 @@ find_dependency(embree 3 CONFIG)
 find_dependency(glm CONFIG)
 find_dependency(TBB CONFIG)
 
+# Use our fetch/find helpers for packages that need special handling
+include(ViraFetchIndicators)
+include(ViraFetchPlog)
+include(ViraFetchTermcolor)
+include(ViraFetchCSPICE)
+
 # Handle CFITSIO
 set(cfitsio_FOUND FALSE)
 try_config_packages(cfitsio "unofficial-cfitsio;cfitsio" "cfitsio;CFITSIO::CFITSIO;cfitsio::cfitsio")
@@ -102,13 +108,21 @@ if(NOT yaml-cpp_FOUND)
     message(FATAL_ERROR "Could not find yaml-cpp")
 endif()
 
+# Handle stb (header-only, installed with vira)
+if(NOT TARGET stb::stb)
+    add_library(stb::stb INTERFACE IMPORTED)
+    set_target_properties(stb::stb PROPERTIES
+        INTERFACE_INCLUDE_DIRECTORIES "${VIRA_INCLUDE_DIR}"
+    )
+endif()
+
 # Restore deprecation warnings
 set(CMAKE_WARN_DEPRECATED ON CACHE BOOL "" FORCE)
 
 # Include the target file
-include("${CMAKE_CURRENT_LIST_DIR}/ViraTargets.cmake")
+include("${CMAKE_CURRENT_LIST_DIR}/viraTargets.cmake")
 
 # Set the main target
 set(VIRA_TARGETS vira::vira)
 
-check_required_components(Vira)
+check_required_components(vira)

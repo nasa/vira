@@ -1,4 +1,4 @@
-name: Build
+name: CI/CD Pipeline
 
 on:
   push:
@@ -104,7 +104,14 @@ jobs:
 
       - name: Build conda package
         shell: bash -el {0}
-        run: conda build dependencies/recipe/
+        run: conda build dependencies/recipe/ --output-folder conda-output
+
+      - name: Upload conda package artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: conda-package-linux
+          path: conda-output/
+          retention-days: 1
 
   conda-build-macos:
     needs: build-other-platforms
@@ -130,7 +137,14 @@ jobs:
 
       - name: Build conda package
         shell: bash -el {0}
-        run: conda build dependencies/recipe/
+        run: conda build dependencies/recipe/ --output-folder conda-output
+
+      - name: Upload conda package artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: conda-package-macos
+          path: conda-output/
+          retention-days: 1
 
   conda-build-windows:
     needs: build-other-platforms
@@ -156,92 +170,144 @@ jobs:
 
       - name: Build conda package
         shell: bash -el {0}
-        run: conda build dependencies/recipe/
+        run: conda build dependencies/recipe/ --output-folder conda-output
 
-  # Tests are being temporarily removed as they have not been implemented.
-  #test:
-  #  needs: build-linux
-  #  runs-on: ubuntu-22.04
-  #  name: Test and Coverage
-  #  
-  #  steps:
-  #    - name: Checkout code
-  #      uses: actions/checkout@v4
-  #      with:
-  #        submodules: recursive
-  #
-  #    - name: Install lcov for coverage
-  #      run: |
-  #        sudo apt-get update
-  #        sudo apt-get install -y lcov
-  #    
-  #    - name: Set up build environment
-  #      uses: ./.github/actions/setup
-  #      with:
-  #        platform: linux
-  #    
-  #    - name: Configure project with coverage
-  #      uses: ./.github/actions/cmake-configure-test
-  #      with:
-  #        platform: linux
-  #    
-  #    - name: Build project
-  #      uses: ./.github/actions/build
-  #      with:
-  #        platform: linux
-  #
-  #    - name: Run tests and generate coverage
-  #      shell: bash -el {0}
-  #      run: |
-  #        echo "Running tests and generating coverage report..."
-  #        cd build
-  #        cmake --build . --target coverage
-  #        echo "Coverage generation completed!"
-  #
-  #    - name: Upload test results
-  #      uses: actions/upload-artifact@v4
-  #      if: always()
-  #      with:
-  #        name: test-results-linux
-  #        path: build/test-results/*.xml
-  #        retention-days: 30
-  #
-  #    - name: Upload coverage reports
-  #      uses: actions/upload-artifact@v4
-  #      with:
-  #        name: coverage-report-linux
-  #        path: build/coverage/
-  #        retention-days: 30
-  #
-  #    - name: Publish test results
-  #      uses: dorny/test-reporter@v1
-  #      if: always()
-  #      with:
-  #        name: Linux Test Results
-  #        path: build/test-results/*.xml
-  #        reporter: java-junit
-  #        fail-on-error: false
-  #
-  #    - name: Upload coverage to Codecov
-  #      uses: codecov/codecov-action@v4
-  #      with:
-  #        file: build/coverage_filtered.info
-  #        flags: unittests
-  #        name: linux-coverage
-  #        fail_ci_if_error: false
-  #        token: ${{ secrets.CODECOV_TOKEN }}
-  #
-  #    - name: Coverage Summary
-  #      run: |
-  #        echo "## Coverage Summary" >> $GITHUB_STEP_SUMMARY
-  #        if [ -f "build/coverage_filtered.info" ]; then
-  #          COVERAGE=$(lcov --summary build/coverage_filtered.info 2>/dev/null | grep -oP 'lines\.*: \K[0-9.]+(?=%)')
-  #          echo "Line Coverage: ${COVERAGE}%" >> $GITHUB_STEP_SUMMARY
-  #          echo "**Line Coverage:** ${COVERAGE}%" >> $GITHUB_STEP_SUMMARY
-  #          echo "[View Full Coverage Report](../actions/runs/${{ github.run_id }}/artifacts)" >> $GITHUB_STEP_SUMMARY
-  #        else
-  #          echo "Coverage report not generated" >> $GITHUB_STEP_SUMMARY
-  #        fi
+      - name: Upload conda package artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: conda-package-windows
+          path: conda-output/
+          retention-days: 1
+
+  conda-test-linux:
+    needs: conda-build-linux
+    runs-on: ubuntu-22.04
+    name: Conda Package Test (linux)
+
+    steps:
+      - name: Checkout code (for test files only)
+        uses: actions/checkout@v4
+        with:
+          sparse-checkout: |
+            tests/packaging
+          sparse-checkout-cone-mode: false
+
+      - name: Download conda package artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: conda-package-linux
+          path: conda-package
+
+      - name: Set up Miniconda
+        uses: conda-incubator/setup-miniconda@v3
+        with:
+          auto-update-conda: true
+          conda-solver: libmamba
+          channels: conda-forge
+          activate-environment: test-env
+          auto-activate-base: false
+
+      - name: Install dependencies and local package
+        shell: bash -el {0}
+        run: |
+          conda install -y cmake ninja
+          conda install -y -c file://$PWD/conda-package vira
+
+      - name: Build and run packaging test
+        shell: bash -el {0}
+        run: |
+          cd tests/packaging
+          mkdir build && cd build
+          cmake .. -DCMAKE_PREFIX_PATH=$CONDA_PREFIX
+          cmake --build .
+          ctest --output-on-failure
+
+  conda-test-macos:
+    needs: conda-build-macos
+    runs-on: macos-14
+    name: Conda Package Test (macos-arm)
+
+    steps:
+      - name: Checkout code (for test files only)
+        uses: actions/checkout@v4
+        with:
+          sparse-checkout: |
+            tests/packaging
+          sparse-checkout-cone-mode: false
+
+      - name: Download conda package artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: conda-package-macos
+          path: conda-package
+
+      - name: Set up Miniconda
+        uses: conda-incubator/setup-miniconda@v3
+        with:
+          auto-update-conda: true
+          conda-solver: libmamba
+          channels: conda-forge
+          activate-environment: test-env
+          auto-activate-base: false
+
+      - name: Install dependencies and local package
+        shell: bash -el {0}
+        run: |
+          conda install -y cmake ninja
+          conda install -y -c file://$PWD/conda-package vira
+
+      - name: Build and run packaging test
+        shell: bash -el {0}
+        run: |
+          cd tests/packaging
+          mkdir build && cd build
+          cmake .. -DCMAKE_PREFIX_PATH=$CONDA_PREFIX
+          cmake --build .
+          ctest --output-on-failure
+
+  conda-test-windows:
+    needs: conda-build-windows
+    runs-on: windows-2022
+    name: Conda Package Test (windows)
+
+    steps:
+      - name: Checkout code (for test files only)
+        uses: actions/checkout@v4
+        with:
+          sparse-checkout: |
+            tests/packaging
+          sparse-checkout-cone-mode: false
+
+      - name: Download conda package artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: conda-package-windows
+          path: conda-package
+
+      - name: Set up Miniconda
+        uses: conda-incubator/setup-miniconda@v3
+        with:
+          auto-update-conda: true
+          conda-solver: libmamba
+          channels: conda-forge
+          activate-environment: test-env
+          auto-activate-base: false
+
+      - name: Install dependencies and local package
+        shell: bash -el {0}
+        run: |
+          conda install -y cmake ninja
+          conda install -y -c file://$PWD/conda-package vira
+
+      - name: Build and run packaging test
+        shell: powershell
+        run: |
+          cd tests/packaging
+          mkdir build
+          cd build
+          cmake .. -DCMAKE_PREFIX_PATH="$env:CONDA_PREFIX;$env:CONDA_PREFIX/Library"
+          cmake --build . --config Release
+          ctest -C Release --output-on-failure
 
   docs:
     needs: build-linux

@@ -32,19 +32,32 @@ requirements:
     - termcolor-cpp =2.0.0  # Terminal colors
     - yaml-cpp =0.8.0       # YAML parser
   run:
+    # For a header-only library, users need dev packages to compile against vira
     - assimp =5.4.3         # Asset Importer (3d models)
     - cfitsio =4.6.2        # FITS I/O
     - cspice =67            # NASA SPICE
     - embree3 =3.13.5       # Ray tracing Acceleration
     - fftw =3.3.10          # Fast Fourier Transform
     - gdal =3.10.0          # Geospatial Abstraction Library
+    - glm =1.0.1            # Linear Algebra for Graphics
+    - indicators =2.3       # Progress bars
     - libtiff =4.7.0        # TIFF I/O
-    - tbb =2021.12.0        # Intel TBB (Threading)
+    - lz4-c =1.10.0         # Compression
+    - plog =1.1.10          # Logging
+    - tbb-devel =2021.12.0  # Intel TBB (Threading) - devel needed for CMake config
+    - termcolor-cpp =2.0.0  # Terminal colors
+    - yaml-cpp =0.8.0       # YAML parser
 
 test:
   commands:
+    # Check headers are installed
     - test -f $PREFIX/include/vira/vira.hpp  # [unix]
     - if not exist %LIBRARY_INC%\\vira\\vira.hpp exit 1  # [win]
+    # Check CMake config files are installed
+    - test -f $PREFIX/lib/cmake/vira/viraConfig.cmake  # [unix]
+    - test -f $PREFIX/lib/cmake/vira/viraTargets.cmake  # [unix]
+    - if not exist %LIBRARY_LIB%\\cmake\\vira\\viraConfig.cmake exit 1  # [win]
+    - if not exist %LIBRARY_LIB%\\cmake\\vira\\viraTargets.cmake exit 1  # [win]
 
 about:
   home: https://github.com/crgnam/vira

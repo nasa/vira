@@ -78,22 +78,22 @@ set(VIRA_INSTALL_CMAKEDIR ${CMAKE_INSTALL_LIBDIR}/cmake/vira)
 
 # Configure package config files
 configure_package_config_file(
-    "${CMAKE_CURRENT_SOURCE_DIR}/cmake/ViraConfig.cmake.in"
-    "${CMAKE_CURRENT_BINARY_DIR}/ViraConfig.cmake"
+    "${CMAKE_CURRENT_SOURCE_DIR}/cmake/viraConfig.cmake.in"
+    "${CMAKE_CURRENT_BINARY_DIR}/viraConfig.cmake"
     INSTALL_DESTINATION ${VIRA_INSTALL_CMAKEDIR}
-    PATH_VARS VIRA_INSTALL_INCLUDEDIR VIRA_INSTALL_LIBDIR
+    PATH_VARS VIRA_INSTALL_INCLUDEDIR VIRA_INSTALL_LIBDIR VIRA_INSTALL_CMAKEDIR
 )
 
 write_basic_package_version_file(
-    "${CMAKE_CURRENT_BINARY_DIR}/ViraConfigVersion.cmake"
+    "${CMAKE_CURRENT_BINARY_DIR}/viraConfigVersion.cmake"
     VERSION ${PROJECT_VERSION}
     COMPATIBILITY SameMajorVersion
 )
 
 # Install CMake config files
 install(FILES
-    "${CMAKE_CURRENT_BINARY_DIR}/ViraConfig.cmake"
-    "${CMAKE_CURRENT_BINARY_DIR}/ViraConfigVersion.cmake"
+    "${CMAKE_CURRENT_BINARY_DIR}/viraConfig.cmake"
+    "${CMAKE_CURRENT_BINARY_DIR}/viraConfigVersion.cmake"
     DESTINATION ${VIRA_INSTALL_CMAKEDIR}
 )
 
@@ -102,6 +102,10 @@ install(FILES
     "${CMAKE_CURRENT_SOURCE_DIR}/cmake/helpers/SimplePackageHelpers.cmake"
     "${CMAKE_CURRENT_SOURCE_DIR}/cmake/helpers/MarkSystemLibrary.cmake"
     "${CMAKE_CURRENT_SOURCE_DIR}/cmake/find/ViraFindProjDB.cmake"
+    "${CMAKE_CURRENT_SOURCE_DIR}/cmake/fetch/ViraFetchIndicators.cmake"
+    "${CMAKE_CURRENT_SOURCE_DIR}/cmake/fetch/ViraFetchPlog.cmake"
+    "${CMAKE_CURRENT_SOURCE_DIR}/cmake/fetch/ViraFetchTermcolor.cmake"
+    "${CMAKE_CURRENT_SOURCE_DIR}/cmake/fetch/ViraFetchCSPICE.cmake"
     DESTINATION ${VIRA_INSTALL_CMAKEDIR}
 )
 
