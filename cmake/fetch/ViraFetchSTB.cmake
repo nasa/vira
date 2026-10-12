@@ -25,7 +25,7 @@ if(NOT stb_FOUND)
         stb
         GIT_REPOSITORY https://github.com/nothings/stb.git
         GIT_TAG f58f558c120e9b32c217290b80bad1a0729fbb2c  # Current main as of Aug 2025
-        GIT_SHALLOW ON
+        GIT_SHALLOW OFF  # shallow clones cannot check out a pinned commit SHA
     )
     FetchContent_GetProperties(stb)
     if(NOT stb_POPULATED)
