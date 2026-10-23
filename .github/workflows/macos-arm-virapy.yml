@@ -5,6 +5,9 @@ on:
     branches: [ main ]
   workflow_dispatch:
 
+permissions:
+  contents: read
+
 jobs:
   macos-arm-python:
     runs-on: macos-14 # Updated August 2025

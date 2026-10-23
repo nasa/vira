@@ -5,6 +5,9 @@ on:
     branches: [ main, develop ]
   workflow_dispatch:
 
+permissions:
+  contents: read
+
 jobs:
   linux-python:
     runs-on: ubuntu-22.04 # Updated August 2025
